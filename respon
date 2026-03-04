@@ -1,0 +1,9 @@
+const options = {
+  method: 'GET',
+  headers: {accept: 'application/json', authorization: 'Basic bW1qZ3JvdXA6U2V4c2xhdmU='}
+};
+
+fetch('https://api.zerion.io/v1/fungibles/0xc00832c32fd5dd2a0c8aa132a957b4b586e3370a?currency=eth', options)
+  .then(res => res.json())
+  .then(res => console.log(res))
+  .catch(err => console.error(err));
