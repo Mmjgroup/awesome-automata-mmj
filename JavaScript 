@@ -1,0 +1,1904 @@
+Zerion API
+Dashboard
+Upgrade
+Settings
+
+Support
+Documentation
+
+Mmjgroup
+API Keys
+zk_087a94606********************14f4
+Active
+
+
+Keep your API keys secure
+
+Keep your API keys private and treat them like passwords. Store them securely and avoid exposing them in public repositories or client-side code.
+
+Current Subscription
+Upgrade Plan
+Demo
+Free
+
+Rate Limits
+Per second
+1
+Per day
+300
+Get Started
+Note: To use your API key, you must transform it for Basic Authentication by adding a ':' suffix and encoding to base64. This transformation is automatically applied when you copy or run the code.
+
+Interactive Workbench
+
+JavaScript
+// Transform your API key for Basic Auth
+const apiKey = '<YOUR_API_KEY>';
+const apiKeyTransformed = btoa(apiKey + ':');
+
+// Make the request
+const response = await fetch(
+  'https://api.zerion.io/v1/wallets/0x42b9df65b219b3dd36ff330a4dd8f327a6ada990/portfolio',
+  {
+    headers: {
+      'Authorization': `Basic ${apiKeyTransformed}`,
+      'accept': 'application/json'
+    }
+  }
+);
+const data = await response.json();
+console.log(data);
+Run
+Copy
+Result
+{
+  "links": {
+    "self": "https://api.zerion.io/v1/wallets/0x42b9df65b219b3dd36ff330a4dd8f327a6ada990/portfolio?currency=usd&filter%5Bpositions%5D=only_simple"
+  },
+  "data": {
+    "type": "portfolio",
+    "id": "0x42b9df65b219b3dd36ff330a4dd8f327a6ada990",
+    "attributes": {
+      "positions_distribution_by_type": {
+        "wallet": 566.4373369743475,
+        "deposited": 0,
+        "borrowed": 0,
+        "locked": 0,
+        "staked": 0
+      },
+      "positions_distribution_by_chain": {
+        "abstract": 12.615556437001409,
+        "ape": 0.3664445776609694,
+        "arbitrum": 42.844388775310314,
+        "aurora": 20.833309801193714,
+        "avalanche": 19.020951843631472,
+        "base": 87.86986824583462,
+        "berachain": 4.326028872081633,
+        "binance-smart-chain": 6.701869440421944,
+        "blast": 11.013438371198703,
+        "celo": 7.089728411276246,
+        "degen": 0.19528904618184373,
+        "ethereum": 54.856201781514606,
+        "fantom": 28.386531584924843,
+        "gravity-alpha": 0.2891534783869017,
+        "hyperevm": 37.11540086306036,
+        "ink": 5.701778714986521,
+        "katana": 5.576076146939211,
+        "linea": 5.112572132919329,
+        "mantle": 17.37345234607345,
+        "megaeth": 9.392761805940282,
+        "monad": 33.02227770677984,
+        "okbchain": 13.247456551154666,
+        "optimism": 6.197659856758924,
+        "plasma": 1.287404721838309,
+        "polygon": 11.913778390618171,
+        "polygon-zkevm": 3.7136022420581343,
+        "scroll": 10.322465882879477,
+        "somnia": 38.67780931314077,
+        "soneium": 4.20629274906783,
+        "sonic": 2.6570087008237735,
+        "unichain": 11.349656308830415,
+        "world": 11.56968210589797,
+        "xdai": 14.218590685237274,
+        "xinfin-xdc": 1.248229865358985,
+        "zero": 15.719622761406974,
+        "zkcandy": 4.830046163401253,
+        "zksync-era": 4.942349285645627,
+        "zora": 0.632601006911199
+      },
+      "total": {
+        "positions": 566.4373369743475
+      },
+      "changes": {
+        "absolute_1d": 102.94313666825678,
+        "percent_1d": 22.210231886455823
+      }
+    }
+  }
+}
+Popular Requests
+Get Wallet Positions
+Retrieve all token positions for a wallet address across multiple chains.
+
+View Endpoint
+Get Fungible Asset
+Fetch detailed information about a specific fungible asset by its ID.
+
+View Endpoint
+Get Wallet History
+Access complete transaction history for any wallet address.
+
+View Endpoint
+Get DeFi Positions
+Retrieve all DeFi positions for a wallet including staked assets and liquidity pools.
+
+View Endpoint
+Get Wallet PnL
+Calculate profit and loss for a wallet address across all positions and trades.
+
+View Endpoint
+Get Wallet Balance Chart
+Access historical balance data to visualize wallet value over time.
+
+View Endpoint
+Resources
+Documentation
+Explore our comprehensive API documentation and integration guides.
+
+View Docs
+Knowledge Center
+Learn best practices and discover new features through our blog.
+
+Read Articles
+Sample App
+Get started quickly with our example projects and code samples.
+
+Coming Soon
+© 2026 Zerion. All rights reserved.
+Version: v1.2.0
+
+Get list of wallet's fungible positions
+
+# Get list of wallet's fungible positions
+
+This endpoint returns a list of wallet positions.
+
+This endpoint supports testnets. To get data for testnets use `X-Env` header.
+
+**Understanding Liquidity Pool Positions:**
+
+Liquidity pools (Uniswap, Curve, Balancer, etc.) return **multiple positions** - one for each token in the pool. Positions belonging to the same pool share the same `group_id` value in attributes.
+
+For example, a Uniswap V2 USDC/WETH pool returns two positions:
+- Position 1: WETH token, `group_id="820ee2f1ca8ccb716f6beb5e450908a028be890ec44aba87c739b416ef41e197"`, `fungible_info.symbol="WETH"`
+- Position 2: USDC token, `group_id="820ee2f1ca8ccb716f6beb5e450908a028be890ec44aba87c739b416ef41e197"`, `fungible_info.symbol="USDC"`
+
+To display all tokens in a liquidity pool together, group positions by their `group_id` attribute.
+
+**Temporary limitations for Solana addresses:**
+- Doesn't support protocol positions
+
+> NOTE: Don't forget to stop retries after some reasonable period of time. If the `200` status is not returned within 2 minutes it most probably means that some unexpected error occurred and the client should stop the polling.
+
+> NOTE: This endpoint supports a lot of filters, sorting and pagination parameters. Make sure that a request URL length is in a safe range for your platform. Usually, 2000 characters are the safe limit in virtually any combination of client and server software.
+
+> NOTE: Consider all IDs as abstract strings, without making any assumptions about their format or relying on such assumptions. There is a non-zero probability that IDs may change in the future, and this should not result in any breaking changes.
+
+
+# OpenAPI definition
+
+```json
+{
+  "openapi": "3.0.3",
+  "info": {
+    "version": "1.0.0",
+    "title": "REST API",
+    "description": "REST-like API provides access to rich Zerion ecosystem.",
+    "contact": {
+      "name": "Zerion API",
+      "url": "https://developers.zerion.io/",
+      "email": "api@zerion.io"
+    }
+  },
+  "servers": [
+    {
+      "description": "Production API",
+      "url": "https://api.zerion.io"
+    }
+  ],
+  "security": [
+    {
+      "APIKeyBasicAuth": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "wallets",
+      "description": "Operations related to wallets, such as portfolio charts, positions, and transactions."
+    }
+  ],
+  "paths": {
+    "/v1/wallets/{address}/positions/": {
+      "get": {
+        "operationId": "listWalletPositions",
+        "summary": "Get wallet fungible positions",
+        "description": "This endpoint returns a list of wallet positions.\n\nThis endpoint supports testnets. To get data for testnets use `X-Env` header.\n\n**Understanding Liquidity Pool Positions:**\n\nLiquidity pools (Uniswap, Curve, Balancer, etc.) return **multiple positions** - one for each token in the pool. Positions belonging to the same pool share the same `group_id` value in attributes.\n\nFor example, a Uniswap V2 USDC/WETH pool returns two positions:\n- Position 1: WETH token, `group_id=\"820ee2f1ca8ccb716f6beb5e450908a028be890ec44aba87c739b416ef41e197\"`, `fungible_info.symbol=\"WETH\"`\n- Position 2: USDC token, `group_id=\"820ee2f1ca8ccb716f6beb5e450908a028be890ec44aba87c739b416ef41e197\"`, `fungible_info.symbol=\"USDC\"`\n\nTo display all tokens in a liquidity pool together, group positions by their `group_id` attribute.\n\n**Temporary limitations for Solana addresses:**\n- Doesn't support protocol positions\n\n> NOTE: Don't forget to stop retries after some reasonable period of time. If the `200` status is not returned within 2 minutes it most probably means that some unexpected error occurred and the client should stop the polling.\n\n> NOTE: This endpoint supports a lot of filters, sorting and pagination parameters. Make sure that a request URL length is in a safe range for your platform. Usually, 2000 characters are the safe limit in virtually any combination of client and server software.\n\n> NOTE: Consider all IDs as abstract strings, without making any assumptions about their format or relying on such assumptions. There is a non-zero probability that IDs may change in the future, and this should not result in any breaking changes.\n",
+        "tags": [
+          "wallets"
+        ],
+        "parameters": [
+          {
+            "name": "filter[positions]",
+            "in": "query",
+            "required": false,
+            "description": "This parameter allows users to filter DeFi positions based on their types. There are three options:\n\n- `only_simple`: Retrieves exclusively wallet-type positions. These are basic, non-protocol related positions. This option is applied if parameter is not specified.\n- `only_complex`: Fetches only positions associated with all DeFi protocols (including staked assets, liquidity pools, etc), like Uniswap or Aave. This option excludes simple wallet positions.\n- `no_filter`: Applies no filtering, thus returning both protocol-related and simple wallet positions.\n\n> ⚠️ Note: Different pricing models are applied for enterprise usage of this API, depending on the filter type selected. For detailed pricing information, please reach out to us at `api@zerion.io`.\n",
+            "schema": {
+              "type": "string",
+              "default": "only_simple",
+              "enum": [
+                "only_simple",
+                "only_complex",
+                "no_filter"
+              ]
+            }
+          },
+          {
+            "$ref": "#/components/parameters/Currency"
+          },
+          {
+            "$ref": "#/components/parameters/WalletAddress"
+          },
+          {
+            "name": "filter[position_types]",
+            "in": "query",
+            "style": "form",
+            "explode": false,
+            "description": "Keep only positions with these types (comma-separated list).\n\nPossible values:\n- `deposit` - Assets deposited into a DeFi protocol (e.g., supplied to lending pools, deposited in vaults, or provided as liquidity)\n- `loan` - Borrowed assets representing a debt position that needs to be repaid\n- `locked` - Assets locked for a specific period or purpose (e.g., vote-escrowed tokens, time-locked tokens)\n- `staked` - Assets staked in a protocol to earn rewards, participate in consensus, or for governance purposes\n- `reward` - Earned rewards that are claimable or have been distributed but not yet withdrawn\n- `wallet` - Regular assets held directly in the wallet, not actively deposited in any protocol\n- `investment` - Investment positions such as tokenized funds, indices, or structured products\n",
+            "schema": {
+              "type": "array",
+              "maxItems": 8,
+              "items": {
+                "$ref": "#/components/schemas/PositionType"
+              }
+            }
+          },
+          {
+            "name": "filter[chain_ids]",
+            "in": "query",
+            "style": "form",
+            "explode": false,
+            "description": "Keep only positions from these chains (comma-separated list). Available chain ids can be found in chains endpoints.",
+            "schema": {
+              "type": "array",
+              "example": [
+                "polygon"
+              ],
+              "maxItems": 25,
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "filter[fungible_ids]",
+            "in": "query",
+            "style": "form",
+            "explode": false,
+            "description": "Keep only positions related to given fungible assets (comma-separated list).",
+            "schema": {
+              "type": "array",
+              "maxItems": 25,
+              "items": {
+                "type": "string",
+                "maxLength": 44
+              }
+            }
+          },
+          {
+            "name": "filter[dapp_ids]",
+            "in": "query",
+            "style": "form",
+            "explode": false,
+            "description": "Keep only positions related to these decentralized applications (dapps) (comma-separated list).",
+            "schema": {
+              "type": "array",
+              "example": [
+                "polygon"
+              ],
+              "maxItems": 25,
+              "items": {
+                "type": "string",
+                "maxLength": 32,
+                "minLength": 1
+              }
+            }
+          },
+          {
+            "name": "filter[trash]",
+            "in": "query",
+            "required": false,
+            "description": "Filter positions based on the `is_trash` flag. If no flag is specified, then `only_non_trash` is applied.",
+            "schema": {
+              "type": "string",
+              "default": "only_non_trash",
+              "enum": [
+                "only_trash",
+                "only_non_trash",
+                "no_filter"
+              ]
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "description": "Choose how the result should be ordered",
+            "schema": {
+              "type": "string",
+              "default": "value",
+              "enum": [
+                "-value",
+                "value"
+              ]
+            }
+          },
+          {
+            "name": "sync",
+            "in": "query",
+            "required": false,
+            "description": "Controls whether the endpoint should wait for position data to be ready before responding.\n\n- `true`: The endpoint will wait up to 30 seconds for position data to be aggregated before responding. If data is ready sooner, the response is returned immediately. If data is not ready within 30 seconds, a timeout error may occur.\n- `false` (default): The endpoint returns immediately with available position data.\n\n> NOTE: When using `sync=true`, be prepared to handle longer response times (up to 30 seconds). Ensure your client timeout settings accommodate this duration.\n",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "X-Env",
+            "in": "header",
+            "description": "Custom header that allows you to get data for testnets.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "testnet"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/PositionsListResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/MalformedParameters"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthenticatedError"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "APIKeyBasicAuth": {
+        "type": "http",
+        "scheme": "basic"
+      }
+    },
+    "parameters": {
+      "Currency": {
+        "name": "currency",
+        "in": "query",
+        "required": false,
+        "description": "Denominated currency value of returned prices",
+        "schema": {
+          "type": "string",
+          "default": "usd",
+          "enum": [
+            "eth",
+            "btc",
+            "usd",
+            "eur",
+            "krw",
+            "rub",
+            "gbp",
+            "aud",
+            "cad",
+            "inr",
+            "jpy",
+            "nzd",
+            "try",
+            "zar",
+            "cny",
+            "chf"
+          ]
+        }
+      },
+      "WalletAddress": {
+        "name": "address",
+        "in": "path",
+        "required": true,
+        "description": "The web3 wallet address",
+        "example": "0x42b9df65b219b3dd36ff330a4dd8f327a6ada990",
+        "schema": {
+          "$ref": "#/components/schemas/WalletAddress"
+        }
+      }
+    },
+    "schemas": {
+      "EVMAddress": {
+        "type": "string",
+        "description": "Ethereum-compatible address (EVM).",
+        "pattern": "^0x[a-fA-F0-9]{40}$",
+        "example": "0x42b9df65b219b3dd36ff330a4dd8f327a6ada990"
+      },
+      "SolanaAddress": {
+        "type": "string",
+        "description": "Solana address",
+        "pattern": "^[1-9A-HJ-NP-Za-km-z]{32,44}$",
+        "example": "8BH9pjtgyZDC4iAQH5ZiYDZ1MDWC98xki2V8NzqqKW3K"
+      },
+      "WalletAddress": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/EVMAddress"
+          },
+          {
+            "$ref": "#/components/schemas/SolanaAddress"
+          }
+        ],
+        "description": "A wallet address, which can be either an EVM or Solana address"
+      },
+      "PositionType": {
+        "type": "string",
+        "nullable": true,
+        "description": "Position's type indicating how the assets are being used or their current state.\n",
+        "enum": [
+          "deposit",
+          "loan",
+          "locked",
+          "staked",
+          "reward",
+          "wallet",
+          "investment"
+        ],
+        "x-enum-descriptions": [
+          "deposit - assets deposited into a DeFi protocol (e.g., lending pools, vaults, LP positions)",
+          "loan - borrowed assets representing a debt position",
+          "locked - assets locked for a period or purpose (e.g., veTokens, time-locks)",
+          "staked - assets staked to earn rewards or participate in consensus",
+          "reward - earned but unclaimed rewards",
+          "wallet - assets held directly in the user wallet",
+          "investment - tokenized funds, indices, structured products"
+        ]
+      },
+      "ResponseLinks-3": {
+        "type": "object",
+        "required": [
+          "self"
+        ],
+        "properties": {
+          "self": {
+            "type": "string",
+            "format": "url",
+            "example": "https://api.zerion.io/v1/wallets/0x42b9df65b219b3dd36ff330a4dd8f327a6ada990/positions/"
+          }
+        }
+      },
+      "Quantity": {
+        "type": "object",
+        "required": [
+          "int",
+          "decimals",
+          "float",
+          "numeric"
+        ],
+        "properties": {
+          "int": {
+            "type": "string",
+            "description": "The integral representation of the quantity (123.45678 -> 12345678).",
+            "example": "12345678"
+          },
+          "decimals": {
+            "type": "integer",
+            "description": "Decimal number precision of the quantity - digits after the floating point.",
+            "example": 5
+          },
+          "float": {
+            "type": "number",
+            "format": "float",
+            "description": "Float representation of the quantity.",
+            "example": 123.45678
+          },
+          "numeric": {
+            "type": "string",
+            "description": "String representation of the quantity.",
+            "example": "123.45678"
+          }
+        }
+      },
+      "Change-2": {
+        "type": "object",
+        "description": "Position changes",
+        "required": [
+          "absolute_1d",
+          "percent_1d"
+        ],
+        "properties": {
+          "absolute_1d": {
+            "type": "number",
+            "format": "float",
+            "description": "Daily absolute position change value",
+            "example": 0.272309794
+          },
+          "percent_1d": {
+            "type": "number",
+            "format": "float",
+            "description": "Daily position change percent",
+            "example": 5.326512552079021
+          }
+        }
+      },
+      "Icon": {
+        "type": "object",
+        "description": "Icon related to object.",
+        "properties": {
+          "url": {
+            "type": "string",
+            "nullable": true,
+            "format": "url",
+            "description": "URL of the icon.",
+            "example": "https://token-icons.s3.amazonaws.com/0x0391d2021f89dc339f60fff84546ea23e337750f.png"
+          }
+        }
+      },
+      "Flags": {
+        "type": "object",
+        "required": [
+          "verified"
+        ],
+        "properties": {
+          "verified": {
+            "type": "boolean",
+            "description": "Whether this fungible verified or not",
+            "example": true
+          }
+        }
+      },
+      "Implementation": {
+        "type": "object",
+        "required": [
+          "chain_id",
+          "decimals"
+        ],
+        "properties": {
+          "chain_id": {
+            "type": "string",
+            "description": "Unique id of the chain.",
+            "example": "ethereum"
+          },
+          "address": {
+            "type": "string",
+            "description": "Implementation address on the chain.",
+            "example": "0x2af1df3ab0ab157e1e2ad8f88a7d04fbea0c7dc6"
+          },
+          "decimals": {
+            "type": "integer",
+            "description": "Number of decimals points of the implementation.",
+            "example": 18
+          }
+        }
+      },
+      "MarketDataChanges": {
+        "type": "object",
+        "properties": {
+          "percent_1d": {
+            "type": "number",
+            "nullable": true,
+            "format": "double",
+            "description": "Price relative change in percent for 1 day",
+            "example": -0.7379066649086338
+          },
+          "percent_30d": {
+            "type": "number",
+            "nullable": true,
+            "format": "double",
+            "description": "Price relative change in percent for 30 days",
+            "example": -2.499465618806962
+          },
+          "percent_90d": {
+            "type": "number",
+            "nullable": true,
+            "format": "double",
+            "description": "Price relative change in percent for 90 days",
+            "example": 11.316340269371775
+          },
+          "percent_365d": {
+            "type": "number",
+            "nullable": true,
+            "format": "double",
+            "description": "Price relative change in percent for 1 year",
+            "example": null
+          }
+        }
+      },
+      "MarketData": {
+        "type": "object",
+        "required": [
+          "price"
+        ],
+        "properties": {
+          "total_supply": {
+            "type": "number",
+            "format": "double",
+            "description": "Total market supply of fungible",
+            "example": 29905.762448515918
+          },
+          "circulating_supply": {
+            "type": "number",
+            "format": "double",
+            "description": "Circulating value of fungible",
+            "example": 29905.762448515918
+          },
+          "fully_diluted_valuation": {
+            "type": "number",
+            "format": "double",
+            "description": "Total market capitalization of fungible in selected currency",
+            "example": 3196313.736038149
+          },
+          "market_cap": {
+            "type": "number",
+            "format": "double",
+            "description": "Circulating market capitalization of fungible in selected currency",
+            "example": 3196313.736038149
+          },
+          "price": {
+            "type": "number",
+            "nullable": true,
+            "format": "double",
+            "description": "Latest fungible price",
+            "example": 106.87952669793131
+          },
+          "changes": {
+            "$ref": "#/components/schemas/MarketDataChanges"
+          }
+        }
+      },
+      "Info": {
+        "type": "object",
+        "required": [
+          "name",
+          "symbol",
+          "icon",
+          "flags",
+          "implementations"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier of the fungible asset.",
+            "example": "0230395c-2b01-46d8-b2d6-ce8121d51f9e"
+          },
+          "name": {
+            "type": "string",
+            "description": "Displayable name of the fungible fungible.",
+            "example": "Bankless BED Index"
+          },
+          "symbol": {
+            "type": "string",
+            "description": "Displayable symbol of the fungible fungible.",
+            "example": "BED"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true,
+            "description": "Brief description of the fungible. Currently available at transaction callback notifications only.",
+            "example": "The BED index is meant to track crypto’s top 3 investab."
+          },
+          "icon": {
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Icon"
+              }
+            ],
+            "nullable": true
+          },
+          "flags": {
+            "$ref": "#/components/schemas/Flags"
+          },
+          "implementations": {
+            "type": "array",
+            "description": "Implementation details of the fungible on various chains.",
+            "items": {
+              "$ref": "#/components/schemas/Implementation"
+            }
+          },
+          "market_data": {
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/MarketData"
+              }
+            ],
+            "nullable": true,
+            "description": "Market data for the fungible, including price, supply, and market cap information. Currently available at transaction callback notifications only."
+          }
+        }
+      },
+      "Flags-2": {
+        "type": "object",
+        "required": [
+          "displayable"
+        ],
+        "properties": {
+          "displayable": {
+            "type": "boolean",
+            "description": "Whether this position should be displayable and calculated in the wallet or not",
+            "example": true
+          },
+          "is_trash": {
+            "type": "boolean",
+            "description": "Is the position classified by Zerion as trash."
+          }
+        }
+      },
+      "DAppInfo": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "AAVE",
+            "description": "Human readable representation of DApp. That offers more intuitive understanding for users.\n\nNote: only available for positions within protocols.\n"
+          },
+          "icon": {
+            "$ref": "#/components/schemas/Icon"
+          },
+          "url": {
+            "type": "string",
+            "format": "url",
+            "description": "URL of the DApp the position relates to.",
+            "example": "https://app.aave.com/"
+          }
+        }
+      },
+      "Attributes-4": {
+        "type": "object",
+        "required": [
+          "quantity",
+          "name"
+        ],
+        "properties": {
+          "parent": {
+            "type": "string",
+            "nullable": true,
+            "description": "Id of parent position",
+            "example": "0x111c47865ade3b172a928df8f990bc7f2a3b9aaa-polygon-asset-none-"
+          },
+          "protocol": {
+            "type": "string",
+            "nullable": true,
+            "description": "Protocol which the position is belong to."
+          },
+          "protocol_module": {
+            "type": "string",
+            "description": "The specific module or functionality within a DeFi protocol where this position is held. This categorizes the type of protocol interaction.\n\nPossible values and their meanings:\n\n- `deposit` - Generic deposit module for protocols with simple deposit functionality\n- `lending` - Lending and borrowing protocols (e.g., Aave, Compound) where users can supply or borrow assets\n- `yield` - Yield optimization and aggregator protocols (e.g., Yearn Finance) that automatically maximize returns\n- `liquidity_pool` - Automated Market Maker (AMM) liquidity pools (e.g., Uniswap, Curve) where users provide liquidity for trading\n- `staked` - Staking modules where assets are staked for rewards, governance, or network security\n- `leveraged_farming` - Leveraged yield farming protocols (e.g., Alpaca Finance) that enable leveraged positions on farms\n- `nft_staked` - NFT staking modules where NFTs are staked to earn rewards\n- `farming` - Yield farming and reward distribution modules (e.g., liquidity mining programs)\n- `locked` - Token locking mechanisms such as vote-escrowed (ve) tokens or time-locked positions\n- `vesting` - Token vesting schedules for team allocations, investor tokens, or earned rewards\n- `rewards` - Unclaimed rewards modules representing rewards that have been earned but not yet claimed\n- `investment` - Investment product modules such as tokenized funds, indices, or structured investment vehicles\n",
+            "example": "lending"
+          },
+          "pool_address": {
+            "type": "string",
+            "description": "Address of the pool the position belongs to if applicable",
+            "example": "0x109830a1aaad605bbf02a9dfa7b0b92ec2fb7daa"
+          },
+          "name": {
+            "type": "string",
+            "description": "Human readable position name",
+            "example": "Asset"
+          },
+          "group_id": {
+            "type": "string",
+            "description": "Unique ID which could be used to group position within DApp naturally for convenience of users. For example for UniswapV2 it is grouping by specific pool.",
+            "example": "0a771a0064dad468045899032c7fb01a971f973f7dff0a5cdc3ce199f45e94d7"
+          },
+          "position_type": {
+            "$ref": "#/components/schemas/PositionType"
+          },
+          "quantity": {
+            "$ref": "#/components/schemas/Quantity"
+          },
+          "value": {
+            "type": "number",
+            "nullable": true,
+            "format": "float",
+            "description": "Position value in requested currency",
+            "example": 5.384656557642683
+          },
+          "price": {
+            "type": "number",
+            "format": "float",
+            "description": "Price of position's asset",
+            "example": 0.043615722
+          },
+          "changes": {
+            "$ref": "#/components/schemas/Change-2"
+          },
+          "fungible_info": {
+            "$ref": "#/components/schemas/Info"
+          },
+          "flags": {
+            "$ref": "#/components/schemas/Flags-2"
+          },
+          "updated_at": {
+            "type": "string",
+            "description": "ISO-8601 timestamp the position was updated at. \nThe field indicates when our service last checked and updated the balance. \nThis update typically occurs immediately after any event causing a change in position.\n",
+            "example": "2023-11-10T23:00:00Z"
+          },
+          "updated_at_block": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Number of the block of the position"
+          },
+          "application_metadata": {
+            "$ref": "#/components/schemas/DAppInfo"
+          }
+        }
+      },
+      "RelationshipLinks": {
+        "type": "object",
+        "required": [
+          "related"
+        ],
+        "properties": {
+          "related": {
+            "type": "string",
+            "format": "url",
+            "description": "URL to the current chain.",
+            "example": "https://api.zerion.io/v1/chains/polygon"
+          }
+        }
+      },
+      "ContainerShort": {
+        "type": "object",
+        "required": [
+          "type",
+          "id"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Chain resource type.",
+            "example": "chains"
+          },
+          "id": {
+            "type": "string",
+            "description": "Chain unique identifier.",
+            "example": "polygon"
+          }
+        }
+      },
+      "Relationship": {
+        "type": "object",
+        "required": [
+          "links",
+          "data"
+        ],
+        "properties": {
+          "links": {
+            "$ref": "#/components/schemas/RelationshipLinks"
+          },
+          "data": {
+            "$ref": "#/components/schemas/ContainerShort"
+          }
+        }
+      },
+      "ContainerShort-2": {
+        "type": "object",
+        "required": [
+          "type",
+          "id"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Decentralized application resource type.",
+            "example": "dapps"
+          },
+          "id": {
+            "type": "string",
+            "description": "Decentralized application ID",
+            "example": "aave-v3"
+          }
+        }
+      },
+      "Relationship-2": {
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/ContainerShort-2"
+          }
+        }
+      },
+      "Relationships": {
+        "type": "object",
+        "required": [
+          "chain",
+          "fungible"
+        ],
+        "properties": {
+          "chain": {
+            "$ref": "#/components/schemas/Relationship"
+          },
+          "fungible": {
+            "type": "object",
+            "required": [
+              "links",
+              "data"
+            ],
+            "properties": {
+              "links": {
+                "type": "object",
+                "required": [
+                  "related"
+                ],
+                "properties": {
+                  "related": {
+                    "format": "url",
+                    "example": "https://api.zerion.io/v1/fungibles/0x111c47865ade3b172a928df8f990bc7f2a3b9aaa"
+                  }
+                }
+              },
+              "data": {
+                "type": "object",
+                "required": [
+                  "type",
+                  "id"
+                ],
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "fungibles"
+                  },
+                  "id": {
+                    "type": "string",
+                    "example": "0x111c47865ade3b172a928df8f990bc7f2a3b9aaa"
+                  }
+                }
+              }
+            }
+          },
+          "dapp": {
+            "$ref": "#/components/schemas/Relationship-2"
+          }
+        }
+      },
+      "Container-3": {
+        "type": "object",
+        "required": [
+          "type",
+          "id",
+          "attributes"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Resource type",
+            "enum": [
+              "positions"
+            ]
+          },
+          "id": {
+            "type": "string",
+            "description": "Position's unique id",
+            "example": "0x111c47865ade3b172a928df8f990bc7f2a3b9aaa-polygon-asset-none-"
+          },
+          "attributes": {
+            "$ref": "#/components/schemas/Attributes-4"
+          },
+          "relationships": {
+            "$ref": "#/components/schemas/Relationships"
+          }
+        }
+      },
+      "Response-3": {
+        "type": "object",
+        "required": [
+          "links",
+          "data"
+        ],
+        "properties": {
+          "links": {
+            "$ref": "#/components/schemas/ResponseLinks-3"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Container-3"
+            }
+          }
+        }
+      }
+    },
+    "responses": {
+      "MalformedParameters": {
+        "description": "Parameters are malformed",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "errors": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "title": {
+                        "type": "string",
+                        "description": "Error short title",
+                        "example": "Parameter is malformed"
+                      },
+                      "detail": {
+                        "type": "string",
+                        "description": "Long description of the error",
+                        "example": "Some validation errors will be described here"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "UnauthenticatedError": {
+        "description": "Unathenticated request",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "errors": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "title": {
+                        "type": "string",
+                        "description": "Error short title",
+                        "example": "Unauthorized Error"
+                      },
+                      "detail": {
+                        "type": "string",
+                        "description": "Long description of the error",
+                        "example": "The API key is invalid, please, make sure that you are using a valid key"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "TooManyRequests": {
+        "description": "Too many requests error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "errors": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "title": {
+                        "type": "string",
+                        "description": "Error short title",
+                        "example": "Too many requests"
+                      },
+                      "detail": {
+                        "type": "string",
+                        "description": "Long description of the error",
+                        "example": "Your request had been throttled"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "PositionsListResponse": {
+        "description": "Response for requested list of positions",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Response-3"
+            }
+          }
+        }
+      }
+    }
+  },
+  "x-readme": {
+    "samples-languages": [
+      "curl",
+      "javascript",
+      "python",
+      "kotlin",
+      "swift",
+      "go"
+    ]
+  }
+}
+```
+Get fungible asset by ID
+
+# Get fungible asset by ID
+
+This endpoint returns a fungible asset by unique identifier
+
+# OpenAPI definition
+
+```json
+{
+  "openapi": "3.0.3",
+  "info": {
+    "version": "1.0.0",
+    "title": "REST API",
+    "description": "REST-like API provides access to rich Zerion ecosystem.",
+    "contact": {
+      "name": "Zerion API",
+      "url": "https://developers.zerion.io/",
+      "email": "api@zerion.io"
+    }
+  },
+  "servers": [
+    {
+      "description": "Production API",
+      "url": "https://api.zerion.io"
+    }
+  ],
+  "security": [
+    {
+      "APIKeyBasicAuth": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "fungibles",
+      "description": "Operations related to fungible assets, such as list them all, search or get by ID."
+    }
+  ],
+  "paths": {
+    "/v1/fungibles/{fungible_id}": {
+      "get": {
+        "operationId": "getFungibleById",
+        "summary": "Get fungible asset by ID",
+        "description": "This endpoint returns a fungible asset by unique identifier",
+        "tags": [
+          "fungibles"
+        ],
+        "parameters": [
+          {
+            "name": "fungible_id",
+            "in": "path",
+            "required": true,
+            "description": "Unique fungible ID",
+            "schema": {
+              "type": "string",
+              "maxLength": 44
+            }
+          },
+          {
+            "$ref": "#/components/parameters/Currency"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SingleFungibleResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/MalformedParameters"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthenticatedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "APIKeyBasicAuth": {
+        "type": "http",
+        "scheme": "basic"
+      }
+    },
+    "parameters": {
+      "Currency": {
+        "name": "currency",
+        "in": "query",
+        "required": false,
+        "description": "Denominated currency value of returned prices",
+        "schema": {
+          "type": "string",
+          "default": "usd",
+          "enum": [
+            "eth",
+            "btc",
+            "usd",
+            "eur",
+            "krw",
+            "rub",
+            "gbp",
+            "aud",
+            "cad",
+            "inr",
+            "jpy",
+            "nzd",
+            "try",
+            "zar",
+            "cny",
+            "chf"
+          ]
+        }
+      }
+    },
+    "schemas": {
+      "Icon": {
+        "type": "object",
+        "description": "Icon related to object.",
+        "properties": {
+          "url": {
+            "type": "string",
+            "nullable": true,
+            "format": "url",
+            "description": "URL of the icon.",
+            "example": "https://token-icons.s3.amazonaws.com/0x0391d2021f89dc339f60fff84546ea23e337750f.png"
+          }
+        }
+      },
+      "Flags": {
+        "type": "object",
+        "required": [
+          "verified"
+        ],
+        "properties": {
+          "verified": {
+            "type": "boolean",
+            "description": "Whether this fungible verified or not",
+            "example": true
+          }
+        }
+      },
+      "Implementation": {
+        "type": "object",
+        "required": [
+          "chain_id",
+          "decimals"
+        ],
+        "properties": {
+          "chain_id": {
+            "type": "string",
+            "description": "Unique id of the chain.",
+            "example": "ethereum"
+          },
+          "address": {
+            "type": "string",
+            "description": "Implementation address on the chain.",
+            "example": "0x2af1df3ab0ab157e1e2ad8f88a7d04fbea0c7dc6"
+          },
+          "decimals": {
+            "type": "integer",
+            "description": "Number of decimals points of the implementation.",
+            "example": 18
+          }
+        }
+      },
+      "MarketDataChanges": {
+        "type": "object",
+        "properties": {
+          "percent_1d": {
+            "type": "number",
+            "nullable": true,
+            "format": "double",
+            "description": "Price relative change in percent for 1 day",
+            "example": -0.7379066649086338
+          },
+          "percent_30d": {
+            "type": "number",
+            "nullable": true,
+            "format": "double",
+            "description": "Price relative change in percent for 30 days",
+            "example": -2.499465618806962
+          },
+          "percent_90d": {
+            "type": "number",
+            "nullable": true,
+            "format": "double",
+            "description": "Price relative change in percent for 90 days",
+            "example": 11.316340269371775
+          },
+          "percent_365d": {
+            "type": "number",
+            "nullable": true,
+            "format": "double",
+            "description": "Price relative change in percent for 1 year",
+            "example": null
+          }
+        }
+      },
+      "MarketData": {
+        "type": "object",
+        "required": [
+          "price"
+        ],
+        "properties": {
+          "total_supply": {
+            "type": "number",
+            "format": "double",
+            "description": "Total market supply of fungible",
+            "example": 29905.762448515918
+          },
+          "circulating_supply": {
+            "type": "number",
+            "format": "double",
+            "description": "Circulating value of fungible",
+            "example": 29905.762448515918
+          },
+          "fully_diluted_valuation": {
+            "type": "number",
+            "format": "double",
+            "description": "Total market capitalization of fungible in selected currency",
+            "example": 3196313.736038149
+          },
+          "market_cap": {
+            "type": "number",
+            "format": "double",
+            "description": "Circulating market capitalization of fungible in selected currency",
+            "example": 3196313.736038149
+          },
+          "price": {
+            "type": "number",
+            "nullable": true,
+            "format": "double",
+            "description": "Latest fungible price",
+            "example": 106.87952669793131
+          },
+          "changes": {
+            "$ref": "#/components/schemas/MarketDataChanges"
+          }
+        }
+      },
+      "ExternalLink": {
+        "type": "object",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Type of the link",
+            "example": "website"
+          },
+          "name": {
+            "type": "string",
+            "description": "Displayable name of the link",
+            "example": "Website"
+          },
+          "url": {
+            "type": "string",
+            "format": "url",
+            "description": "Link to the external resource",
+            "example": "https://www.indexcoop.com"
+          }
+        }
+      },
+      "ExternalLinks": {
+        "type": "array",
+        "description": "A list of relevant URLs.",
+        "items": {
+          "$ref": "#/components/schemas/ExternalLink"
+        }
+      },
+      "Attributes-10": {
+        "type": "object",
+        "required": [
+          "name",
+          "symbol",
+          "flags",
+          "external_links",
+          "implementations",
+          "market_data"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Displayable name of the fungible.",
+            "example": "Bankless BED Index"
+          },
+          "symbol": {
+            "type": "string",
+            "description": "Displayable symbol of the fungible.",
+            "example": "BED"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true,
+            "description": "Brief description of the fungible.",
+            "example": "The BED index is meant to track crypto's top 3 investab."
+          },
+          "icon": {
+            "$ref": "#/components/schemas/Icon"
+          },
+          "flags": {
+            "$ref": "#/components/schemas/Flags"
+          },
+          "external_links": {
+            "$ref": "#/components/schemas/ExternalLinks"
+          },
+          "implementations": {
+            "type": "array",
+            "description": "Implementation details of the fungible on various chains.",
+            "items": {
+              "$ref": "#/components/schemas/Implementation"
+            }
+          },
+          "market_data": {
+            "$ref": "#/components/schemas/MarketData"
+          }
+        }
+      },
+      "Relationships-6": {
+        "type": "object",
+        "required": [
+          "chart_hour",
+          "chart_day",
+          "chart_week",
+          "chart_month",
+          "chart_year",
+          "chart_max"
+        ],
+        "properties": {
+          "chart_hour": {
+            "type": "object",
+            "required": [
+              "links",
+              "data"
+            ],
+            "properties": {
+              "links": {
+                "type": "object",
+                "required": [
+                  "related"
+                ],
+                "properties": {
+                  "related": {
+                    "format": "url",
+                    "example": "https://api.zerion.io/v1/fungibles/0x2af1df3ab0ab157e1e2ad8f88a7d04fbea0c7dc6/charts/hour"
+                  }
+                }
+              },
+              "data": {
+                "type": "object",
+                "required": [
+                  "type",
+                  "id"
+                ],
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "fungible_charts"
+                  },
+                  "id": {
+                    "type": "string",
+                    "example": "0x2af1df3ab0ab157e1e2ad8f88a7d04fbea0c7dc6-hour"
+                  }
+                }
+              }
+            }
+          },
+          "chart_day": {
+            "type": "object",
+            "required": [
+              "links",
+              "data"
+            ],
+            "properties": {
+              "links": {
+                "type": "object",
+                "required": [
+                  "related"
+                ],
+                "properties": {
+                  "related": {
+                    "format": "url",
+                    "example": "https://api.zerion.io/v1/fungibles/0x2af1df3ab0ab157e1e2ad8f88a7d04fbea0c7dc6/charts/day"
+                  }
+                }
+              },
+              "data": {
+                "type": "object",
+                "required": [
+                  "type",
+                  "id"
+                ],
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "fungible_charts"
+                  },
+                  "id": {
+                    "type": "string",
+                    "example": "0x2af1df3ab0ab157e1e2ad8f88a7d04fbea0c7dc6-day"
+                  }
+                }
+              }
+            }
+          },
+          "chart_week": {
+            "type": "object",
+            "required": [
+              "links",
+              "data"
+            ],
+            "properties": {
+              "links": {
+                "type": "object",
+                "required": [
+                  "related"
+                ],
+                "properties": {
+                  "related": {
+                    "format": "url",
+                    "example": "https://api.zerion.io/v1/fungibles/0x2af1df3ab0ab157e1e2ad8f88a7d04fbea0c7dc6/charts/week"
+                  }
+                }
+              },
+              "data": {
+                "type": "object",
+                "required": [
+                  "type",
+                  "id"
+                ],
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "fungible_charts"
+                  },
+                  "id": {
+                    "type": "string",
+                    "example": "0x2af1df3ab0ab157e1e2ad8f88a7d04fbea0c7dc6-week"
+                  }
+                }
+              }
+            }
+          },
+          "chart_month": {
+            "type": "object",
+            "required": [
+              "links",
+              "data"
+            ],
+            "properties": {
+              "links": {
+                "type": "object",
+                "required": [
+                  "related"
+                ],
+                "properties": {
+                  "related": {
+                    "format": "url",
+                    "example": "https://api.zerion.io/v1/fungibles/0x2af1df3ab0ab157e1e2ad8f88a7d04fbea0c7dc6/charts/month"
+                  }
+                }
+              },
+              "data": {
+                "type": "object",
+                "required": [
+                  "type",
+                  "id"
+                ],
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "fungible_charts"
+                  },
+                  "id": {
+                    "type": "string",
+                    "example": "0x2af1df3ab0ab157e1e2ad8f88a7d04fbea0c7dc6-month"
+                  }
+                }
+              }
+            }
+          },
+          "chart_year": {
+            "type": "object",
+            "required": [
+              "links",
+              "data"
+            ],
+            "properties": {
+              "links": {
+                "type": "object",
+                "required": [
+                  "related"
+                ],
+                "properties": {
+                  "related": {
+                    "format": "url",
+                    "example": "https://api.zerion.io/v1/fungibles/0x2af1df3ab0ab157e1e2ad8f88a7d04fbea0c7dc6/charts/year"
+                  }
+                }
+              },
+              "data": {
+                "type": "object",
+                "required": [
+                  "type",
+                  "id"
+                ],
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "fungible_charts"
+                  },
+                  "id": {
+                    "type": "string",
+                    "example": "0x2af1df3ab0ab157e1e2ad8f88a7d04fbea0c7dc6-year"
+                  }
+                }
+              }
+            }
+          },
+          "chart_max": {
+            "type": "object",
+            "required": [
+              "links",
+              "data"
+            ],
+            "properties": {
+              "links": {
+                "type": "object",
+                "required": [
+                  "related"
+                ],
+                "properties": {
+                  "related": {
+                    "format": "url",
+                    "example": "https://api.zerion.io/v1/fungibles/0x2af1df3ab0ab157e1e2ad8f88a7d04fbea0c7dc6/charts/max"
+                  }
+                }
+              },
+              "data": {
+                "type": "object",
+                "required": [
+                  "type",
+                  "id"
+                ],
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "fungible_charts"
+                  },
+                  "id": {
+                    "type": "string",
+                    "example": "0x2af1df3ab0ab157e1e2ad8f88a7d04fbea0c7dc6-max"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "Container-10": {
+        "type": "object",
+        "description": "Object, representing fungible asset.",
+        "required": [
+          "type",
+          "id"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Fungible resource type",
+            "example": "fungibles"
+          },
+          "id": {
+            "type": "string",
+            "description": "Fungible unique identifier",
+            "example": "0x2af1df3ab0ab157e1e2ad8f88a7d04fbea0c7dc6"
+          },
+          "attributes": {
+            "$ref": "#/components/schemas/Attributes-10"
+          },
+          "relationships": {
+            "$ref": "#/components/schemas/Relationships-6"
+          }
+        }
+      },
+      "ResponseLinks-7": {
+        "type": "object",
+        "properties": {
+          "related": {
+            "type": "string",
+            "format": "url",
+            "example": "https://api.zerion.io/v1/fungibles/0x2af1df3ab0ab157e1e2ad8f88a7d04fbea0c7dc6"
+          }
+        }
+      },
+      "Response-7": {
+        "type": "object",
+        "required": [
+          "links",
+          "data"
+        ],
+        "properties": {
+          "links": {
+            "$ref": "#/components/schemas/ResponseLinks-7"
+          },
+          "data": {
+            "$ref": "#/components/schemas/Container-10"
+          }
+        }
+      }
+    },
+    "responses": {
+      "MalformedParameters": {
+        "description": "Parameters are malformed",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "errors": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "title": {
+                        "type": "string",
+                        "description": "Error short title",
+                        "example": "Parameter is malformed"
+                      },
+                      "detail": {
+                        "type": "string",
+                        "description": "Long description of the error",
+                        "example": "Some validation errors will be described here"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "UnauthenticatedError": {
+        "description": "Unathenticated request",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "errors": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "title": {
+                        "type": "string",
+                        "description": "Error short title",
+                        "example": "Unauthorized Error"
+                      },
+                      "detail": {
+                        "type": "string",
+                        "description": "Long description of the error",
+                        "example": "The API key is invalid, please, make sure that you are using a valid key"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "TooManyRequests": {
+        "description": "Too many requests error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "errors": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "title": {
+                        "type": "string",
+                        "description": "Error short title",
+                        "example": "Too many requests"
+                      },
+                      "detail": {
+                        "type": "string",
+                        "description": "Long description of the error",
+                        "example": "Your request had been throttled"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "SingleFungibleResponse": {
+        "description": "Resource for requested fungible",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Response-7"
+            }
+          }
+        }
+      },
+      "NotFoundResponse": {
+        "description": "Resource was not found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "errors": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "title": {
+                        "type": "string",
+                        "description": "Error short title",
+                        "example": "Resource was not found"
+                      },
+                      "detail": {
+                        "type": "string",
+                        "description": "Long description of the error",
+                        "example": "Requested resource was not found, try later"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "x-readme": {
+    "samples-languages": [
+      "curl",
+      "javascript",
+      "python",
+      "kotlin",
+      "swift",
+      "go"
+    ]
+  }
+}
+```
