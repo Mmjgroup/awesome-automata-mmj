@@ -1,9 +1,103 @@
-const options = {
-  method: 'GET',
-  headers: {accept: 'application/json', authorization: 'Basic bW1qZ3JvdXA6U2V4c2xhdmU='}
-};
-
-fetch('https://api.zerion.io/v1/fungibles/0xc00832c32fd5dd2a0c8aa132a957b4b586e3370a?currency=eth', options)
-  .then(res => res.json())
-  .then(res => console.log(res))
-  .catch(err => console.error(err));
+{
+  "links": {
+    "related": "https://api.zerion.io/v1/fungibles/0x2af1df3ab0ab157e1e2ad8f88a7d04fbea0c7dc6"
+  },
+  "data": {
+    "type": "fungibles",
+    "id": "0x2af1df3ab0ab157e1e2ad8f88a7d04fbea0c7dc6",
+    "attributes": {
+      "name": "Bankless BED Index",
+      "symbol": "BED",
+      "description": "The BED index is meant to track crypto's top 3 investab.",
+      "icon": {
+        "url": "https://token-icons.s3.amazonaws.com/0x0391d2021f89dc339f60fff84546ea23e337750f.png"
+      },
+      "flags": {
+        "verified": true
+      },
+      "external_links": [
+        {
+          "type": "website",
+          "name": "Website",
+          "url": "https://www.indexcoop.com"
+        }
+      ],
+      "implementations": [
+        {
+          "chain_id": "ethereum",
+          "address": "0x2af1df3ab0ab157e1e2ad8f88a7d04fbea0c7dc6",
+          "decimals": 18
+        }
+      ],
+      "market_data": {
+        "total_supply": 29905.762448515918,
+        "circulating_supply": 29905.762448515918,
+        "fully_diluted_valuation": 3196313.736038149,
+        "market_cap": 3196313.736038149,
+        "price": 106.87952669793131,
+        "changes": {
+          "percent_1d": -0.7379066649086338,
+          "percent_30d": -2.499465618806962,
+          "percent_90d": 11.316340269371775,
+          "percent_365d": null
+        }
+      }
+    },
+    "relationships": {
+      "chart_hour": {
+        "links": {
+          "related": "https://api.zerion.io/v1/fungibles/0x2af1df3ab0ab157e1e2ad8f88a7d04fbea0c7dc6/charts/hour"
+        },
+        "data": {
+          "type": "fungible_charts",
+          "id": "0x2af1df3ab0ab157e1e2ad8f88a7d04fbea0c7dc6-hour"
+        }
+      },
+      "chart_day": {
+        "links": {
+          "related": "https://api.zerion.io/v1/fungibles/0x2af1df3ab0ab157e1e2ad8f88a7d04fbea0c7dc6/charts/day"
+        },
+        "data": {
+          "type": "fungible_charts",
+          "id": "0x2af1df3ab0ab157e1e2ad8f88a7d04fbea0c7dc6-day"
+        }
+      },
+      "chart_week": {
+        "links": {
+          "related": "https://api.zerion.io/v1/fungibles/0x2af1df3ab0ab157e1e2ad8f88a7d04fbea0c7dc6/charts/week"
+        },
+        "data": {
+          "type": "fungible_charts",
+          "id": "0x2af1df3ab0ab157e1e2ad8f88a7d04fbea0c7dc6-week"
+        }
+      },
+      "chart_month": {
+        "links": {
+          "related": "https://api.zerion.io/v1/fungibles/0x2af1df3ab0ab157e1e2ad8f88a7d04fbea0c7dc6/charts/month"
+        },
+        "data": {
+          "type": "fungible_charts",
+          "id": "0x2af1df3ab0ab157e1e2ad8f88a7d04fbea0c7dc6-month"
+        }
+      },
+      "chart_year": {
+        "links": {
+          "related": "https://api.zerion.io/v1/fungibles/0x2af1df3ab0ab157e1e2ad8f88a7d04fbea0c7dc6/charts/year"
+        },
+        "data": {
+          "type": "fungible_charts",
+          "id": "0x2af1df3ab0ab157e1e2ad8f88a7d04fbea0c7dc6-year"
+        }
+      },
+      "chart_max": {
+        "links": {
+          "related": "https://api.zerion.io/v1/fungibles/0x2af1df3ab0ab157e1e2ad8f88a7d04fbea0c7dc6/charts/max"
+        },
+        "data": {
+          "type": "fungible_charts",
+          "id": "0x2af1df3ab0ab157e1e2ad8f88a7d04fbea0c7dc6-max"
+        }
+      }
+    }
+  }
+}
