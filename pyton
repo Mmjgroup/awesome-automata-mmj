@@ -1,0 +1,17 @@
+import requests
+import base64
+
+# Transform your API key for Basic Auth
+api_key = 'zk_087a94606ebd4f41a55e7c0e0f1b14f4'
+api_key_transformed = base64.b64encode(f'{api_key}:'.encode()).decode()
+
+# Make the request
+response = requests.get(
+    'https://api.zerion.io/v1/wallets/0x42b9df65b219b3dd36ff330a4dd8f327a6ada990/portfolio',
+    headers={
+        'Authorization': f'Basic {api_key_transformed}',
+        'accept': 'application/json'
+    }
+)
+data = response.json()
+print(data)
